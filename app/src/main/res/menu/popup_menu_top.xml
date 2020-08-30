@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/allClearHistoryWeb"
+        android:title="@string/popup_menu_top_clear_all_history"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/findWordToPage"
+        android:title="@string/popup_menu_top_find_to_page"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/listDownloads"
+        android:title="@string/popup_menu_top_list_downloads"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/pintPdfPage"
+        android:title="@string/popup_menu_top_print_pdf_page"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/shareUrlWebView"
+        android:title="@string/popup_menu_top_share_link"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/exitApp"
+        android:title="@string/popup_menu_top_exit"
+        app:showAsAction="never"/>
+</menu>

@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">My WebView</string>
+    <string name="text_title_header_drawer">نمایش دهنده وب</string>
+    <string name="text_introduction_designer_app">توسعه یافته توسط محمّد کریمی</string>
+    <string name="text_hint_find_input_activity">چست و جو...</string>
+    <string name="bottom_nav_forward">بعدی</string>
+    <string name="bottom_nav_back">قبلی</string>
+    <string name="bottom_nav_add_tab">زبانه جدید</string>
+    <string name="bottom_nav_home_page">صفحه اصلی</string>
+    <string name="bottom_nav_menu_drawer">منو</string>
+    <string name="popup_menu_top_clear_all_history">حذف تمام تریخچه مرور</string>
+    <string name="popup_menu_top_find_to_page">جست و جو در صفحه</string>
+    <string name="popup_menu_top_list_downloads">لیست دانلود ها</string>
+    <string name="popup_menu_top_print_pdf_page">پرینت صفحه</string>
+    <string name="popup_menu_top_share_link">اشتراک لینک</string>
+    <string name="popup_menu_top_exit">بستن</string>
+    <string name="activity_main_switch_desktop_mode">حالت دسکتاپ</string>
+</resources>
