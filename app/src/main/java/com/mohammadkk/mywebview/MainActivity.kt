@@ -60,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         registerForContextMenu(scrollWeb)
         confirmPermissions()
         scrollWeb.loadUrl(UrlHelper.googleUrl)
+
         scrollWeb.webViewClient = object : WebViewClient(){
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 view!!.loadUrl(url)
@@ -76,6 +77,7 @@ class MainActivity : AppCompatActivity() {
                 if (!cci.checkedConnectionInternet()) {
                     Snackbar.make(mainDrawer, "اتصال اینترنت را بررسی کنید.", Snackbar.LENGTH_LONG).show()
                     iconDynamicWeb.setImageResource(R.mipmap.ic_browser_round)
+                    actionMainBar.setBackgroundResource(R.color.blueThree)
                 }
                 if (url!!.contains("mailto:") || url.contains("sms:") || url.contains("tel:")){
                     scrollWeb.stopLoading()
@@ -106,6 +108,9 @@ class MainActivity : AppCompatActivity() {
             override fun onReceivedIcon(view: WebView?, icon: Bitmap?) {
                 super.onReceivedIcon(view, icon)
                 iconDynamicWeb.setImageBitmap(icon)
+                if (cci.checkedConnectionInternet()){
+                    actionMainBar.setBackgroundColor(scrollWeb.getColor(icon!!))
+                }
             }
             override fun onGeolocationPermissionsShowPrompt(origin: String?, callback: GeolocationPermissions.Callback?) {
                 super.onGeolocationPermissionsShowPrompt(origin, callback)

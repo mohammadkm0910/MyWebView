@@ -2,6 +2,7 @@ package com.mohammadkk.mywebview
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.webkit.WebSettings
@@ -48,6 +49,7 @@ class MyWebView : WebView,NestedScrollingChild {
         this.isScrollbarFadingEnabled = true
         this.isFocusable = true
     }
+    @Suppress("DEPRECATION")
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         var result = false
@@ -130,5 +132,11 @@ class MyWebView : WebView,NestedScrollingChild {
         webSettings.useWideViewPort = enabled
         webSettings.loadWithOverviewMode = enabled
         this.reload()
+    }
+    fun getColor(bitmap: Bitmap):Int{
+        val newBitmap = Bitmap.createScaledBitmap(bitmap,1,1,true)
+        val color = newBitmap.getPixel(0,0)
+        newBitmap.recycle()
+        return color
     }
 }
