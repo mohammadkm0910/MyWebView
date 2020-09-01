@@ -64,6 +64,13 @@ class MainActivity : AppCompatActivity() {
         scrollWeb.webViewClient = object : WebViewClient(){
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 view!!.loadUrl(url)
+                if (url!!.contains("mailto:") || url.contains("sms:") || url.contains("tel:")){
+                    scrollWeb.stopLoading()
+                    val i = Intent()
+                    i.action = Intent.ACTION_VIEW
+                    i.data = Uri.parse(url)
+                    startActivity(i)
+                }
                 return true
             }
             override fun onLoadResource(view: WebView?, url: String?) {
@@ -79,16 +86,7 @@ class MainActivity : AppCompatActivity() {
                     iconDynamicWeb.setImageResource(R.mipmap.ic_browser_round)
                     actionMainBar.setBackgroundResource(R.color.blueThree)
                 }
-                if (url!!.contains("mailto:") || url.contains("sms:") || url.contains("tel:")){
-                    scrollWeb.stopLoading()
-                    val i = Intent()
-                    i.action = Intent.ACTION_VIEW
-                    i.data = Uri.parse(url)
-                    startActivity(i)
-                } else {
-                    edtUrl.setText(scrollWeb.url)
-                }
-
+                edtUrl.setText(scrollWeb.url)
             }
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
