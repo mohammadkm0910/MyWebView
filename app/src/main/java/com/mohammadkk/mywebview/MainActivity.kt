@@ -274,7 +274,10 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.goToHomePage -> scrollWeb.loadUrl("https://www.google.com/")
                 R.id.addTabActivity -> {
-                    startActivity(Intent(applicationContext, MainActivity::class.java))
+                    val intent = Intent(applicationContext, MainActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
+                    startActivity(intent)
                 }
                 R.id.goBackWebView -> if (scrollWeb.canGoBack()) {
                     scrollWeb.goBack()
