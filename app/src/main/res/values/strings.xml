@@ -15,4 +15,5 @@
     <string name="popup_menu_top_share_link">اشتراک لینک</string>
     <string name="popup_menu_top_exit">بستن</string>
     <string name="activity_main_switch_desktop_mode">حالت دسکتاپ</string>
+    <string name="activity_main_color_inversion_switch">وارونگی رنک</string>
 </resources>

@@ -76,6 +76,13 @@
                 android:text="@string/activity_main_switch_desktop_mode"
                 android:paddingVertical="4dp"
                 android:paddingHorizontal="8dp"/>
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/btnSwitchInversionColor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_main_color_inversion_switch"
+                android:paddingVertical="4dp"
+                android:paddingHorizontal="8dp" />
         </LinearLayout>
     </com.google.android.material.navigation.NavigationView>
 </androidx.drawerlayout.widget.DrawerLayout>

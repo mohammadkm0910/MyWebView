@@ -1,10 +1,9 @@
 package com.mohammadkk.mywebview
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.DownloadManager
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
+import android.content.*
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -38,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var saveSetting: SaveSetting
     private lateinit var mainUrl: String
     private var isAllowedFinish:Boolean = false
+    private var iInterfaceInversed:String = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -51,6 +51,11 @@ class MainActivity : AppCompatActivity() {
         } else {
             scrollWeb.desktopMode(false)
         }
+        iInterfaceInversed = if (saveSetting.inversionColorLoad()) {
+            UrlHelper.jsInversesColor
+        } else {
+            ""
+        }
         setSupportActionBar(actionMainBar)
         onActionbarTop()
         toggleButtonManagement()
@@ -60,7 +65,6 @@ class MainActivity : AppCompatActivity() {
         registerForContextMenu(scrollWeb)
         confirmPermissions()
         scrollWeb.loadUrl(UrlHelper.googleUrl)
-
         scrollWeb.webViewClient = object : WebViewClient(){
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 view!!.loadUrl(url)
@@ -87,6 +91,7 @@ class MainActivity : AppCompatActivity() {
                     actionMainBar.setBackgroundResource(R.color.blueThree)
                 }
                 edtUrl.setText(scrollWeb.url)
+                view!!.evaluateJavascript(iInterfaceInversed,null)
             }
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
@@ -238,9 +243,20 @@ class MainActivity : AppCompatActivity() {
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, URLUtil.guessFileName(url, contentDisposition, mimetype))
             val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             dm.enqueue(request)
+            "شروع دانود...".myToast(2)
+            registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        }
+
+    }
+    private val onComplete:BroadcastReceiver = object : BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            "دانلود با موفیت انجام شد".myToast(3)
         }
     }
-
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(onComplete)
+    }
     private fun initSpinner() {
         val array = ArrayList<String>()
         array.add("google")
@@ -271,7 +287,6 @@ class MainActivity : AppCompatActivity() {
         }
         urlMainSpinner.setSelection(saveSetting.loadPossession())
     }
-
     private fun bottomNavigationManagement() {
         bottomNavigationItems.setOnNavigationItemSelectedListener { item: MenuItem ->
             when (item.itemId) {
@@ -296,9 +311,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("JavascriptInterface")
     private fun toggleButtonManagement() {
         if (saveSetting.desktopModeLoad()) {
             btnSwitchDesktopMode.isChecked = true
+        }
+        if (saveSetting.inversionColorLoad()) {
+            btnSwitchInversionColor.isChecked = true
         }
         btnSwitchDesktopMode.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
             if (isChecked) {
@@ -309,12 +328,22 @@ class MainActivity : AppCompatActivity() {
             mainDrawer.closeDrawer(mainNav)
             saveSetting.desktopModeSave(isChecked)
         }
+        btnSwitchInversionColor.setOnCheckedChangeListener { buttonView, isChecked ->
+            iInterfaceInversed = if (isChecked){
+                UrlHelper.jsInversesColor
+            } else {
+                ""
+            }
+            scrollWeb.reload()
+            mainDrawer.closeDrawer(mainNav)
+            saveSetting.inversionColorSave(isChecked)
+        }
     }
     private fun onActionbarTop() {
         edtUrl.setOnEditorActionListener { v, actionId, event ->
-            val query = edtUrl.text.toString()
+            val query = v.text.toString()
             if (actionId == EditorInfo.IME_ACTION_GO) {
-                if (query.startsWith("http")) {
+                if (query.startsWith("http") || query.startsWith("file")) {
                     scrollWeb.loadUrl(query)
                 } else {
                     if (query.startsWith("www")) {
@@ -336,7 +365,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun confirmPermissions() {
-        val permission = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION)
+        val permission = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.ACCESS_FINE_LOCATION)
         if (!hasPermissions(this, permission.toString())){
             ActivityCompat.requestPermissions(this,permission,100)
         }
@@ -390,9 +419,12 @@ class MainActivity : AppCompatActivity() {
         }
         return super.onKeyDown(keyCode, event)
     }
+    @SuppressLint("UseCompatLoadingForDrawables", "ResourceAsColor")
     private fun String.myToast(mode: Int) {
         when (mode) {
             1 -> Toasty.warning(applicationContext, this, Toast.LENGTH_LONG).show()
+            2 -> Toasty.info(applicationContext, this, Toast.LENGTH_LONG).show()
+            3 -> Toasty.success(applicationContext, this, Toast.LENGTH_LONG).show()
         }
     }
 }

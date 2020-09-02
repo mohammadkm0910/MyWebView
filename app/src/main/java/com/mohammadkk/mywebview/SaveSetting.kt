@@ -15,13 +15,21 @@ class SaveSetting(private var context: Context) {
         editor.apply()
     }
     fun desktopModeLoad(): Boolean {
-        val preferences =
-            context.getSharedPreferences("mainSetting", Context.MODE_PRIVATE)
+        val preferences = context.getSharedPreferences("mainSetting", Context.MODE_PRIVATE)
         return preferences.getBoolean("desktop", false)
     }
     fun desktopModeSave(desktop: Boolean) {
         val preferences = context.getSharedPreferences("mainSetting", Context.MODE_PRIVATE)
         val editor = preferences.edit().putBoolean("desktop", desktop)
+        editor.apply()
+    }
+    fun inversionColorLoad(): Boolean {
+        val preferences = context.getSharedPreferences("mainSetting", Context.MODE_PRIVATE)
+        return preferences.getBoolean("inversion", false)
+    }
+    fun inversionColorSave(desktop: Boolean) {
+        val preferences = context.getSharedPreferences("mainSetting", Context.MODE_PRIVATE)
+        val editor = preferences.edit().putBoolean("inversion", desktop)
         editor.apply()
     }
 }
