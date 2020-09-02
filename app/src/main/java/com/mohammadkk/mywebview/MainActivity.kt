@@ -230,6 +230,11 @@ class MainActivity : AppCompatActivity() {
         scrollWeb.reload()
     }
     private fun downloadManager() {
+        val onComplete:BroadcastReceiver = object : BroadcastReceiver(){
+            override fun onReceive(context: Context?, intent: Intent?) {
+                "دانلود با موفیت انجام شد".myToast(3)
+            }
+        }
         scrollWeb.setDownloadListener { url: String?, userAgent: String?, contentDisposition: String?, mimetype: String?, contentLength: Long ->
             val request = DownloadManager.Request(Uri.parse(url))
             request.setMimeType(mimetype)
@@ -246,17 +251,8 @@ class MainActivity : AppCompatActivity() {
             "شروع دانود...".myToast(2)
             registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         }
+    }
 
-    }
-    private val onComplete:BroadcastReceiver = object : BroadcastReceiver(){
-        override fun onReceive(context: Context?, intent: Intent?) {
-            "دانلود با موفیت انجام شد".myToast(3)
-        }
-    }
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(onComplete)
-    }
     private fun initSpinner() {
         val array = ArrayList<String>()
         array.add("google")
