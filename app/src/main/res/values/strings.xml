@@ -16,4 +16,5 @@
     <string name="popup_menu_top_exit">بستن</string>
     <string name="activity_main_switch_desktop_mode">حالت دسکتاپ</string>
     <string name="activity_main_color_inversion_switch">وارونگی رنک</string>
+    <string name="activity_main_ad_block_switch">مسدود کردن تبلیغات</string>
 </resources>

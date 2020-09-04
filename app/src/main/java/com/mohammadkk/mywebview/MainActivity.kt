@@ -27,6 +27,8 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.app.ActivityCompat
 import com.google.android.material.snackbar.Snackbar
+import com.monstertechno.adblocker.AdBlockerWebView
+import com.monstertechno.adblocker.util.AdBlocker
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.action_main_bar.*
 import kotlinx.android.synthetic.main.activity_main.*
@@ -64,6 +66,7 @@ class MainActivity : AppCompatActivity() {
         downloadManager()
         registerForContextMenu(scrollWeb)
         confirmPermissions()
+        AdBlockerWebView.init(this).initializeWebView(scrollWeb)
         scrollWeb.loadUrl(UrlHelper.googleUrl)
         scrollWeb.webViewClient = object : WebViewClient(){
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
@@ -82,6 +85,9 @@ class MainActivity : AppCompatActivity() {
                 val engineJsDesktopMode = "document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));"
                 view!!.evaluateJavascript(engineJsDesktopMode, null)
             }
+            override fun shouldInterceptRequest(view: WebView?, url: String?): WebResourceResponse? {
+                return if (AdBlockerWebView.blockAds(view, url)) AdBlocker.createEmptyResource() else super.shouldInterceptRequest(view, url)
+            }
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 progressBarWeb.visibility = View.VISIBLE
@@ -91,7 +97,7 @@ class MainActivity : AppCompatActivity() {
                     actionMainBar.setBackgroundResource(R.color.blueThree)
                 }
                 edtUrl.setText(scrollWeb.url)
-                view!!.evaluateJavascript(iInterfaceInversed,null)
+                view!!.evaluateJavascript(iInterfaceInversed, null)
             }
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
@@ -152,9 +158,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
     fun createPopupMenu(view: View) {
-        val wrapper = ContextThemeWrapper(this@MainActivity,R.style.customPopupMenuStyleOne)
-        val popup = PopupMenu(wrapper,popupMenuBtn)
-        popup.menuInflater.inflate(R.menu.popup_menu_top,popup.menu)
+        val wrapper = ContextThemeWrapper(this@MainActivity, R.style.customPopupMenuStyleOne)
+        val popup = PopupMenu(wrapper, popupMenuBtn)
+        popup.menuInflater.inflate(R.menu.popup_menu_top, popup.menu)
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.allClearHistoryWeb -> {
@@ -361,16 +367,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun confirmPermissions() {
-        val permission = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.ACCESS_FINE_LOCATION)
+        val permission = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION)
         if (!hasPermissions(this, permission.toString())){
-            ActivityCompat.requestPermissions(this,permission,100)
+            ActivityCompat.requestPermissions(this, permission, 100)
         }
     }
     @Suppress("SENSELESS_COMPARISON")
     private fun hasPermissions(context: Context, vararg permissions: String):Boolean{
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context!= null && permissions != null){
             for (permission in permissions){
-                if (ActivityCompat.checkSelfPermission(context,permission) != PackageManager.PERMISSION_GRANTED){
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED){
                     return false
                 }
             }
