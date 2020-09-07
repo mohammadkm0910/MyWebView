@@ -17,10 +17,7 @@ import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.webkit.*
-import android.widget.AdapterView
-import android.widget.CompoundButton
-import android.widget.FrameLayout
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ContextThemeWrapper
@@ -32,6 +29,8 @@ import com.monstertechno.adblocker.util.AdBlocker
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.action_main_bar.*
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 @Suppress("DEPRECATION", "UNUSED_ANONYMOUS_PARAMETER")
 class MainActivity : AppCompatActivity() {
@@ -260,11 +259,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initSpinner() {
-        val array = ArrayList<String>()
-        array.add("google")
-        array.add("Bing")
-        array.add("Yahoo")
-        urlMainSpinner.item = array
+        val urlArray = arrayOf("Google","Bing","Yahoo")
+        val arrayAdapter = ArrayAdapter(this,R.layout.url_spinner,urlArray)
+        urlMainSpinner.adapter = arrayAdapter
         urlMainSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
                 when (position) {
