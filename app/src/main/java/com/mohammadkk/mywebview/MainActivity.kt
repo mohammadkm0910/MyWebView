@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.net.http.SslCertificate
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -17,36 +18,35 @@ import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.webkit.*
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.CompoundButton
+import android.widget.FrameLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.app.ActivityCompat
 import com.google.android.material.snackbar.Snackbar
+import com.mohammadkk.mywebview.utils.EssentialMethod
+import com.mohammadkk.mywebview.utils.MyToast
 import com.monstertechno.adblocker.AdBlockerWebView
 import com.monstertechno.adblocker.util.AdBlocker
-import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.action_main_bar.*
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
-import kotlin.collections.ArrayList
 
 @Suppress("DEPRECATION", "UNUSED_ANONYMOUS_PARAMETER")
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),EssentialMethod {
     private lateinit var cci: CheckConnectionInternet
     private lateinit var saveSetting: SaveSetting
     private lateinit var mainUrl: String
-    private var isAllowedFinish:Boolean = false
+    private var isFinishApp:Boolean = false
     private var iInterfaceInversed:String = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         cci = CheckConnectionInternet(this)
         saveSetting = SaveSetting(this)
-        webRefresher.setOnRefreshListener {
-            scrollWeb.reload()
-        }
         if (saveSetting.desktopModeLoad()) {
             scrollWeb.desktopMode(true)
         } else {
@@ -57,6 +57,9 @@ class MainActivity : AppCompatActivity() {
         } else {
             ""
         }
+        initWebView()
+        refreshPage()
+        pageInfo()
         setSupportActionBar(actionMainBar)
         onActionbarTop()
         toggleButtonManagement()
@@ -65,96 +68,7 @@ class MainActivity : AppCompatActivity() {
         downloadManager()
         registerForContextMenu(scrollWeb)
         confirmPermissions()
-        AdBlockerWebView.init(this).initializeWebView(scrollWeb)
-        scrollWeb.loadUrl(UrlHelper.googleUrl)
-        scrollWeb.webViewClient = object : WebViewClient(){
-            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                view!!.loadUrl(url)
-                if (url!!.contains("mailto:") || url.contains("sms:") || url.contains("tel:")){
-                    scrollWeb.stopLoading()
-                    val i = Intent()
-                    i.action = Intent.ACTION_VIEW
-                    i.data = Uri.parse(url)
-                    startActivity(i)
-                }
-                return true
-            }
-            override fun onLoadResource(view: WebView?, url: String?) {
-                super.onLoadResource(view, url)
-                val engineJsDesktopMode = "document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));"
-                view!!.evaluateJavascript(engineJsDesktopMode, null)
-            }
-            override fun shouldInterceptRequest(view: WebView?, url: String?): WebResourceResponse? {
-                return if (AdBlockerWebView.blockAds(view, url)) AdBlocker.createEmptyResource() else super.shouldInterceptRequest(view, url)
-            }
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-                progressBarWeb.visibility = View.VISIBLE
-                if (!cci.checkedConnectionInternet()) {
-                    Snackbar.make(mainDrawer, "اتصال اینترنت را بررسی کنید.", Snackbar.LENGTH_LONG).show()
-                    iconDynamicWeb.setImageResource(R.mipmap.ic_browser_round)
-                    actionMainBar.setBackgroundResource(R.color.blueThree)
-                }
-                edtUrl.setText(scrollWeb.url)
-                view!!.evaluateJavascript(iInterfaceInversed, null)
-            }
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                progressBarWeb.visibility = View.GONE
-                webRefresher.isRefreshing = false
-            }
-        }
-        scrollWeb.webChromeClient = object : WebChromeClient() {
-            private var mCustomView: View? = null
-            private var mOriginalSystemUiVisibility = 0
-            private var mOriginalOrientation = 0
-            private var mCustomViewCallback: CustomViewCallback? = null
-            override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                super.onProgressChanged(view, newProgress)
-                progressBarWeb.max = newProgress
-            }
-            override fun onReceivedIcon(view: WebView?, icon: Bitmap?) {
-                super.onReceivedIcon(view, icon)
-                iconDynamicWeb.setImageBitmap(icon)
-                if (cci.checkedConnectionInternet()){
-                    actionMainBar.setBackgroundColor(scrollWeb.getColor(icon!!))
-                }
-            }
-            override fun onGeolocationPermissionsShowPrompt(origin: String?, callback: GeolocationPermissions.Callback?) {
-                super.onGeolocationPermissionsShowPrompt(origin, callback)
-                callback!!.invoke(origin, true, false)
-            }
-            override fun onShowCustomView(view: View, callback: CustomViewCallback) {
-                if (mCustomView != null) {
-                    onHideCustomView()
-                    return
-                }
-                mCustomView = view
-                mOriginalSystemUiVisibility = window.decorView.systemUiVisibility
-                mOriginalOrientation = requestedOrientation
-                mCustomViewCallback = callback
-                val decor = window.decorView as FrameLayout
-                decor.addView(mCustomView, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
-                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                        View.SYSTEM_UI_FLAG_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_IMMERSIVE
-                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-               bottomNavigationItems.visibility = View.GONE
-            }
-            override fun onHideCustomView() {
-                val decor = window.decorView as FrameLayout
-                decor.removeView(mCustomView)
-                mCustomView = null
-                window.decorView.systemUiVisibility = mOriginalSystemUiVisibility
-                requestedOrientation = mOriginalOrientation
-                mCustomViewCallback!!.onCustomViewHidden()
-                mCustomViewCallback = null
-                bottomNavigationItems.visibility = View.VISIBLE
-            }
-        }
+
     }
     fun createPopupMenu(view: View) {
         val wrapper = ContextThemeWrapper(this@MainActivity, R.style.customPopupMenuStyleOne)
@@ -226,18 +140,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun printPdf() {
-        val title: String = HelperUnit().fileName(scrollWeb.url)
+        val title: String = HelperUnit().fileName(scrollWeb.url!!)
         val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
         val documentAdapter = scrollWeb.createPrintDocumentAdapter(title)
         printManager.print(title, documentAdapter, PrintAttributes.Builder().build())
     }
-    fun refreshingWebLoading(view: View) {
-        scrollWeb.reload()
-    }
     private fun downloadManager() {
         val onComplete:BroadcastReceiver = object : BroadcastReceiver(){
             override fun onReceive(context: Context?, intent: Intent?) {
-                "دانلود با موفیت انجام شد".myToast(3)
+                MyToast(applicationContext, "دانلود با موفقیت انجام شد", 3).show()
             }
         }
         scrollWeb.setDownloadListener { url: String?, userAgent: String?, contentDisposition: String?, mimetype: String?, contentLength: Long ->
@@ -253,14 +164,13 @@ class MainActivity : AppCompatActivity() {
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, URLUtil.guessFileName(url, contentDisposition, mimetype))
             val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             dm.enqueue(request)
-            "شروع دانود...".myToast(2)
+            MyToast(applicationContext, "شروع دانلود", 2).show()
             registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         }
     }
-
     private fun initSpinner() {
-        val urlArray = arrayOf("Google","Bing","Yahoo")
-        val arrayAdapter = ArrayAdapter(this,R.layout.url_spinner,urlArray)
+        val urlArray = arrayOf("Google", "Bing", "Yahoo")
+        val arrayAdapter = ArrayAdapter(this, R.layout.url_spinner, urlArray)
         urlMainSpinner.adapter = arrayAdapter
         urlMainSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
@@ -268,19 +178,17 @@ class MainActivity : AppCompatActivity() {
                     0 -> {
                         mainUrl = UrlHelper.googleSearchUrl
                         saveSetting.savePossession(position)
-                        mainDrawer.closeDrawer(mainNav)
                     }
                     1 -> {
                         mainUrl = UrlHelper.bingSearchUrl
                         saveSetting.savePossession(position)
-                        mainDrawer.closeDrawer(mainNav)
                     }
                     2 -> {
                         mainUrl = UrlHelper.yahooSearchUrl
                         saveSetting.savePossession(position)
-                        mainDrawer.closeDrawer(mainNav)
                     }
                 }
+                mainDrawer.closeDrawer(mainNav)
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
@@ -407,9 +315,9 @@ class MainActivity : AppCompatActivity() {
             if (scrollWeb.canGoBack()) {
                 scrollWeb.goBack()
             } else {
-                if (!isAllowedFinish) {
-                    "چیزی برای برگشت وجود ندارد!!".myToast(1)
-                    isAllowedFinish = true
+                if (!isFinishApp) {
+                    MyToast(applicationContext, "چیزی برای برگشت وجود ندارد!!", 1).show()
+                    isFinishApp = true
                 } else {
                     finish()
                 }
@@ -418,12 +326,140 @@ class MainActivity : AppCompatActivity() {
         }
         return super.onKeyDown(keyCode, event)
     }
-    @SuppressLint("UseCompatLoadingForDrawables", "ResourceAsColor")
-    private fun String.myToast(mode: Int) {
-        when (mode) {
-            1 -> Toasty.warning(applicationContext, this, Toast.LENGTH_LONG).show()
-            2 -> Toasty.info(applicationContext, this, Toast.LENGTH_LONG).show()
-            3 -> Toasty.success(applicationContext, this, Toast.LENGTH_LONG).show()
+    override fun initWebView() {
+        AdBlockerWebView.init(this).initializeWebView(scrollWeb)
+        scrollWeb.loadUrl(UrlHelper.googleUrl)
+        scrollWeb.webViewClient = object : WebViewClient(){
+            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                view!!.loadUrl(url!!)
+                if (url.contains("mailto:") || url.contains("sms:") || url.contains("tel:")){
+                    scrollWeb.stopLoading()
+                    val i = Intent()
+                    i.action = Intent.ACTION_VIEW
+                    i.data = Uri.parse(url)
+                    startActivity(i)
+                }
+                return true
+            }
+            override fun onLoadResource(view: WebView?, url: String?) {
+                super.onLoadResource(view, url)
+                view!!.evaluateJavascript(UrlHelper.engineJsDesktopMode, null)
+            }
+            override fun shouldInterceptRequest(view: WebView?, url: String?): WebResourceResponse? {
+                return if (AdBlockerWebView.blockAds(view, url)) AdBlocker.createEmptyResource() else super.shouldInterceptRequest(view, url)
+            }
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                progressBarWeb.visibility = View.VISIBLE
+                if (!cci.checkedConnectionInternet()) {
+                    Snackbar.make(mainDrawer, "اتصال اینترنت را بررسی کنید.", Snackbar.LENGTH_LONG).show()
+                    actionMainBar.setBackgroundResource(R.color.blueThree)
+                }
+                edtUrl.setText(url)
+                view!!.evaluateJavascript(iInterfaceInversed, null)
+            }
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                progressBarWeb.visibility = View.GONE
+                webRefresher.isRefreshing = false
+            }
         }
+        scrollWeb.webChromeClient = object : WebChromeClient() {
+            private var mCustomView: View? = null
+            private var mOriginalSystemUiVisibility = 0
+            private var mOriginalOrientation = 0
+            private var mCustomViewCallback: CustomViewCallback? = null
+            override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                super.onProgressChanged(view, newProgress)
+                progressBarWeb.max = newProgress
+            }
+            override fun onReceivedIcon(view: WebView?, icon: Bitmap?) {
+                super.onReceivedIcon(view, icon)
+                if (cci.checkedConnectionInternet()){
+                    actionMainBar.setBackgroundColor(scrollWeb.getColor(icon!!))
+                }
+                edtUrl.setText(view!!.url)
+            }
+            override fun onGeolocationPermissionsShowPrompt(origin: String?, callback: GeolocationPermissions.Callback?) {
+                super.onGeolocationPermissionsShowPrompt(origin, callback)
+                callback!!.invoke(origin, true, false)
+            }
+            override fun onShowCustomView(view: View, callback: CustomViewCallback) {
+                if (mCustomView != null) {
+                    onHideCustomView()
+                    return
+                }
+                mCustomView = view
+                mOriginalSystemUiVisibility = window.decorView.systemUiVisibility
+                mOriginalOrientation = requestedOrientation
+                mCustomViewCallback = callback
+                val decor = window.decorView as FrameLayout
+                decor.addView(mCustomView, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_IMMERSIVE
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                bottomNavigationItems.visibility = View.GONE
+            }
+            override fun onHideCustomView() {
+                val decor = window.decorView as FrameLayout
+                decor.removeView(mCustomView)
+                mCustomView = null
+                window.decorView.systemUiVisibility = mOriginalSystemUiVisibility
+                requestedOrientation = mOriginalOrientation
+                mCustomViewCallback!!.onCustomViewHidden()
+                mCustomViewCallback = null
+                bottomNavigationItems.visibility = View.VISIBLE
+            }
+        }
+    }
+    override fun refreshPage() {
+        webRefresher.setOnRefreshListener {
+            scrollWeb.reload()
+            isFinishApp = false
+        }
+        btnWebRefresher.setOnClickListener {
+            scrollWeb.reload()
+            isFinishApp = false
+        }
+    }
+    override fun pageInfo() {
+        btnSecurityPageInfo.setOnClickListener {
+            var s = "URL: " + scrollWeb.url + "\n";
+            s += "Title: " + scrollWeb.title + "\n\n"
+            val certificate:SslCertificate? = scrollWeb.certificate
+            s += if (certificate == null) "Not secure" else "Certificate:\n" + certificateToStr(certificate)
+            AlertDialog.Builder(this)
+                    .setTitle("گواهی امنیت صفحه")
+                    .setMessage(s)
+                    .setNegativeButton("ok", DialogInterface.OnClickListener { dialogInterface, i -> dialogInterface.dismiss() })
+                    .show()
+        }
+    }
+    private fun certificateToStr(certificate: SslCertificate?): String? {
+        if (certificate == null) {
+            return null
+        }
+        var s = ""
+        val issuedTo = certificate.issuedTo
+        if (issuedTo != null) {
+            s += "Issued to: ${issuedTo.dName} \n"
+        }
+        val issuedBy = certificate.issuedBy
+        if (issuedBy != null) {
+            s += "Issued by: ${issuedBy.dName} \n"
+        }
+        val issueDate = certificate.validNotBeforeDate
+        if (issueDate != null) {
+            s += String.format("Issued on: %tF %tT %tz\n", issueDate, issueDate, issueDate)
+        }
+        val expiryDate = certificate.validNotAfterDate
+        if (expiryDate != null) {
+            s += String.format("Expires on: %tF %tT %tz\n", expiryDate, expiryDate, expiryDate)
+        }
+        return s
     }
 }

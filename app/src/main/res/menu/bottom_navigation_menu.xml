@@ -3,20 +3,20 @@
     <item
         android:id="@+id/goNextWebView"
         android:icon="@drawable/ic_forward"
-        android:title="@string/bottom_nav_forward"/>
+        android:title="@string/forward"/>
     <item
         android:id="@+id/goBackWebView"
         android:icon="@drawable/ic_back"
-        android:title="@string/bottom_nav_back"/>
+        android:title="@string/back"/>
     <item
         android:id="@+id/addTabActivity"
         android:icon="@drawable/ic_add"
-        android:title="@string/bottom_nav_add_tab"/>
+        android:title="@string/new_tab"/>
     <item android:id="@+id/goToHomePage"
         android:icon="@drawable/ic_home"
-        android:title="@string/bottom_nav_home_page"/>
+        android:title="@string/home_page"/>
     <item
         android:id="@+id/openDrawer"
         android:icon="@drawable/ic_drawer"
-        android:title="@string/bottom_nav_menu_drawer" />
+        android:title="@string/open_menu"/>
 </menu>

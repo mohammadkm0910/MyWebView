@@ -13,6 +13,7 @@ import androidx.core.view.NestedScrollingChildHelper
 import androidx.core.view.ViewCompat
 import kotlin.math.max
 
+@Suppress("DEPRECATION")
 class MyWebView : WebView,NestedScrollingChild {
     private var mLastMotionY = 0
     private val mScrollOffset = IntArray(2)
@@ -25,7 +26,7 @@ class MyWebView : WebView,NestedScrollingChild {
     constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs,R.attr.name){
         initWebView()
     }
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr){
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context!!, attrs, defStyleAttr){
         initWebView()
     }
     @SuppressLint("SetJavaScriptEnabled")

@@ -3,26 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/allClearHistoryWeb"
-        android:title="@string/popup_menu_top_clear_all_history"
+        android:title="@string/clear_all_history"
         app:showAsAction="never" />
     <item
         android:id="@+id/findWordToPage"
-        android:title="@string/popup_menu_top_find_to_page"
+        android:title="@string/find_in_page"
         app:showAsAction="never"/>
     <item
         android:id="@+id/listDownloads"
-        android:title="@string/popup_menu_top_list_downloads"
+        android:title="@string/list_downloads"
         app:showAsAction="never"/>
     <item
         android:id="@+id/pintPdfPage"
-        android:title="@string/popup_menu_top_print_pdf_page"
+        android:title="@string/print_page_pdf"
         app:showAsAction="never"/>
     <item
         android:id="@+id/shareUrlWebView"
-        android:title="@string/popup_menu_top_share_link"
+        android:title="@string/share_link"
         app:showAsAction="never"/>
     <item
         android:id="@+id/exitApp"
-        android:title="@string/popup_menu_top_exit"
+        android:title="@string/exit"
         app:showAsAction="never"/>
 </menu>

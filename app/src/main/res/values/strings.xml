@@ -1,20 +1,25 @@
 <resources>
     <string name="app_name">My WebView</string>
-    <string name="text_title_header_drawer">نمایش دهنده وب</string>
-    <string name="text_introduction_designer_app">توسعه یافته توسط محمّد کریمی</string>
-    <string name="text_hint_find_input_activity">چست و جو...</string>
-    <string name="bottom_nav_forward">بعدی</string>
-    <string name="bottom_nav_back">قبلی</string>
-    <string name="bottom_nav_add_tab">زبانه جدید</string>
-    <string name="bottom_nav_home_page">صفحه اصلی</string>
-    <string name="bottom_nav_menu_drawer">منو</string>
-    <string name="popup_menu_top_clear_all_history">حذف تمام تریخچه مرور</string>
-    <string name="popup_menu_top_find_to_page">جست و جو در صفحه</string>
-    <string name="popup_menu_top_list_downloads">لیست دانلود ها</string>
-    <string name="popup_menu_top_print_pdf_page">پرینت صفحه</string>
-    <string name="popup_menu_top_share_link">اشتراک لینک</string>
-    <string name="popup_menu_top_exit">بستن</string>
-    <string name="activity_main_switch_desktop_mode">حالت دسکتاپ</string>
-    <string name="activity_main_color_inversion_switch">وارونگی رنک</string>
-    <string name="activity_main_ad_block_switch">مسدود کردن تبلیغات</string>
+    <!--header_layout_drawer-->
+    <string name="title_header_drawer">نمایش دهنده وب</string>
+    <string name="description_header_drawer">توسعه دهنده: محمّد کریمی</string>
+    <!--action_main_bar-->
+    <string name="hint_input_text_search">جست و جو…</string>
+    <string name="hint_input_text_find_in_page">یافتن در صفحه</string>
+    <!--activity_main-->
+    <string name="desktop_mode_toggle">حالت دسکتاپ</string>
+    <string name="color_inversion_toggle">وارونگی رنگ</string>
+    <!--bottom_navigation_menu-->
+    <string name="forward">بعدی</string>
+    <string name="back">قبلی</string>
+    <string name="new_tab">زبانه جدید</string>
+    <string name="home_page">صفحه اصلی</string>
+    <string name="open_menu">منو</string>
+    <!--popup_menu_top-->
+    <string name="clear_all_history">حذف تمام تاریخچه مرور</string>
+    <string name="find_in_page">جست و جو در صفحه</string>
+    <string name="list_downloads">لیست دانلود ها</string>
+    <string name="print_page_pdf">پرینت صفحه</string>
+    <string name="share_link">اشتراک صفحه</string>
+    <string name="exit">بستن</string>
 </resources>
