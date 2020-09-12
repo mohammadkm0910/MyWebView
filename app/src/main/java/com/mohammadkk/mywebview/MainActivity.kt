@@ -18,22 +18,23 @@ import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.webkit.*
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.CompoundButton
-import android.widget.FrameLayout
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.app.ActivityCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.switchmaterial.SwitchMaterial
+import com.mohammadkk.mywebview.adapter.SpinnerIconAdapter
 import com.mohammadkk.mywebview.utils.EssentialMethod
 import com.mohammadkk.mywebview.utils.MyToast
 import com.monstertechno.adblocker.AdBlockerWebView
 import com.monstertechno.adblocker.util.AdBlocker
 import kotlinx.android.synthetic.main.action_main_bar.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.toggle_layout.*
 
 @Suppress("DEPRECATION", "UNUSED_ANONYMOUS_PARAMETER")
 class MainActivity : AppCompatActivity(),EssentialMethod {
@@ -42,10 +43,12 @@ class MainActivity : AppCompatActivity(),EssentialMethod {
     private lateinit var mainUrl: String
     private var isFinishApp:Boolean = false
     private var iInterfaceInversed:String = ""
+    private lateinit var behavior:BottomSheetBehavior<View>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         cci = CheckConnectionInternet(this)
+        behavior = BottomSheetBehavior.from(toggleLayout)
         saveSetting = SaveSetting(this)
         if (saveSetting.desktopModeLoad()) {
             scrollWeb.desktopMode(true)
@@ -169,11 +172,11 @@ class MainActivity : AppCompatActivity(),EssentialMethod {
         }
     }
     private fun initSpinner() {
-        val urlArray = arrayOf("Google", "Bing", "Yahoo")
-        val arrayAdapter = ArrayAdapter(this, R.layout.url_spinner, urlArray)
-        urlMainSpinner.adapter = arrayAdapter
-        urlMainSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+        val icons = arrayOf(R.drawable.ic_google,R.drawable.ic_bing,R.drawable.ic_yahoo)
+        val spinnerIconAdapter = SpinnerIconAdapter(this,icons)
+        searchEngineSpinner.adapter = spinnerIconAdapter
+        searchEngineSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 when (position) {
                     0 -> {
                         mainUrl = UrlHelper.googleSearchUrl
@@ -188,11 +191,43 @@ class MainActivity : AppCompatActivity(),EssentialMethod {
                         saveSetting.savePossession(position)
                     }
                 }
-                mainDrawer.closeDrawer(mainNav)
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
-        urlMainSpinner.setSelection(saveSetting.loadPossession())
+        searchEngineSpinner.setSelection(saveSetting.loadPossession())
+        when(saveSetting.loadPossession()){
+            0 -> MyToast(this,"موتور جست و جو گوگل",2).show()
+            1 -> MyToast(this,"موتور جست و جو بینگ",2).show()
+            2 -> MyToast(this,"موتور جست و جو یاهو",2).show()
+        }
+    }
+    @SuppressLint("InflateParams")
+    private fun toggleButtonManagement() {
+        if (saveSetting.desktopModeLoad()) {
+            btnSwitchDesktopMode.isChecked = true
+        }
+        if (saveSetting.inversionColorLoad()) {
+            btnSwitchInversionColor.isChecked = true
+        }
+        btnSwitchDesktopMode.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+            if (isChecked) {
+                scrollWeb.desktopMode(true)
+            } else {
+                scrollWeb.desktopMode(false)
+            }
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            saveSetting.desktopModeSave(isChecked)
+        }
+        btnSwitchInversionColor.setOnCheckedChangeListener { buttonView, isChecked ->
+            iInterfaceInversed = if (isChecked){
+                UrlHelper.jsInversesColor
+            } else {
+                ""
+            }
+            scrollWeb.reload()
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            saveSetting.inversionColorSave(isChecked)
+        }
     }
     private fun bottomNavigationManagement() {
         bottomNavigationItems.setOnNavigationItemSelectedListener { item: MenuItem ->
@@ -211,41 +246,17 @@ class MainActivity : AppCompatActivity(),EssentialMethod {
                     scrollWeb.goForward()
                 }
                 R.id.openDrawer -> {
-                    mainDrawer.openDrawer(mainNav)
+                    if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED){
+                        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                    } else {
+                        behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                    }
                 }
             }
             true
         }
     }
 
-    @SuppressLint("JavascriptInterface")
-    private fun toggleButtonManagement() {
-        if (saveSetting.desktopModeLoad()) {
-            btnSwitchDesktopMode.isChecked = true
-        }
-        if (saveSetting.inversionColorLoad()) {
-            btnSwitchInversionColor.isChecked = true
-        }
-        btnSwitchDesktopMode.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            if (isChecked) {
-                scrollWeb.desktopMode(true)
-            } else {
-                scrollWeb.desktopMode(false)
-            }
-            mainDrawer.closeDrawer(mainNav)
-            saveSetting.desktopModeSave(isChecked)
-        }
-        btnSwitchInversionColor.setOnCheckedChangeListener { buttonView, isChecked ->
-            iInterfaceInversed = if (isChecked){
-                UrlHelper.jsInversesColor
-            } else {
-                ""
-            }
-            scrollWeb.reload()
-            mainDrawer.closeDrawer(mainNav)
-            saveSetting.inversionColorSave(isChecked)
-        }
-    }
     private fun onActionbarTop() {
         edtUrl.setOnEditorActionListener { v, actionId, event ->
             val query = v.text.toString()
