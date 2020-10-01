@@ -34,7 +34,6 @@
             android:id="@+id/webRefresher"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="?attr/actionBarSize"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
             <com.mohammadkk.mywebview.MyWebView
                 android:id="@+id/scrollWeb"
@@ -43,6 +42,47 @@
                 android:focusable="true"
                 android:focusableInTouchMode="true"/>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/mainNav"
+        android:layout_width="260dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_gravity="start"
+        android:background="@color/white">
+        <include layout="@layout/header_layout_drawer"/>
+        <RadioGroup
+            android:id="@+id/drawerEngineSearch"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <RadioButton
+                android:id="@+id/radioGoogle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/RadioFaLanguageFix"
+                android:text="@string/google"
+                android:drawableEnd="@drawable/ic_google"/>
+            <RadioButton
+                android:id="@+id/radioBing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/RadioFaLanguageFix"
+                android:text="@string/bing"
+                android:drawableEnd="@drawable/ic_bing"/>
+            <RadioButton
+                android:id="@+id/radioYahoo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/RadioFaLanguageFix"
+                android:text="@string/yahoo"
+                android:drawableEnd="@drawable/ic_yahoo"/>
+        </RadioGroup>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tabContainerRecycler"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNavigationItems"
             android:layout_width="match_parent"
@@ -53,19 +93,5 @@
             app:itemTextColor="@color/bottom_nav_color_selected"
             app:labelVisibilityMode="labeled"
             app:menu="@menu/bottom_navigation_menu" />
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-    <com.google.android.material.navigation.NavigationView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:headerLayout="@layout/header_layout_drawer"
-        android:id="@+id/mainNav">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_marginTop="180dp">
-
-        </LinearLayout>
-    </com.google.android.material.navigation.NavigationView>
+    </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.drawerlayout.widget.DrawerLayout>

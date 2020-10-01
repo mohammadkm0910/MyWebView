@@ -24,4 +24,7 @@
     <string name="print_page_pdf">پرینت صفحه</string>
     <string name="share_link">اشتراک صفحه</string>
     <string name="exit">بستن برنامه</string>
+    <string name="google">گوگل</string>
+    <string name="bing">بینگ</string>
+    <string name="yahoo">یاهو</string>
 </resources>

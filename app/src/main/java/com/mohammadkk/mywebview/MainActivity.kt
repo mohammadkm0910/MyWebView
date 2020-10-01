@@ -16,6 +16,7 @@ import android.print.PrintManager
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
+import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.webkit.*
@@ -27,13 +28,13 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.mohammadkk.mywebview.adapter.SpinnerIconAdapter
 import com.mohammadkk.mywebview.utils.EssentialMethod
 import com.mohammadkk.mywebview.utils.MyToast
 import com.monstertechno.adblocker.AdBlockerWebView
 import com.monstertechno.adblocker.util.AdBlocker
 import kotlinx.android.synthetic.main.action_main_bar.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.header_layout_drawer.*
 
 @Suppress("DEPRECATION", "UNUSED_ANONYMOUS_PARAMETER")
 class MainActivity : AppCompatActivity(),EssentialMethod {
@@ -61,10 +62,10 @@ class MainActivity : AppCompatActivity(),EssentialMethod {
         initWebView()
         refreshPage()
         pageInfo()
+        setupDrawer()
         setSupportActionBar(actionMainBar)
         onActionbarTop()
         bottomNavigationManagement()
-        initSpinner()
         downloadManager()
         registerForContextMenu(scrollWeb)
         confirmPermissions()
@@ -173,6 +174,56 @@ class MainActivity : AppCompatActivity(),EssentialMethod {
         popup.showAtLocation(popupMenuBtn,Gravity.TOP or Gravity.START,10,100)
 
     }
+    private fun setupDrawer() {
+        var isDropEngineSearch = false
+        when(saveSetting.loadPossession()){
+            0 -> {
+                radioGoogle.isChecked = true
+                mainUrl = UrlHelper.googleSearchUrl
+            }
+            1 -> {
+                radioBing.isChecked = true
+                mainUrl = UrlHelper.bingSearchUrl
+            }
+            2 -> {
+                radioYahoo.isChecked = true
+                mainUrl = UrlHelper.yahooSearchUrl
+            }
+        }
+        btnDropDrawer.setOnClickListener {
+            if (!isDropEngineSearch){
+                btnDropDrawer.animate().rotation(180F).setDuration(500).start()
+                drawerEngineSearch.visibility = View.VISIBLE
+                drawerEngineSearch.startAnimation(AnimationUtils.loadAnimation(this,R.anim.slide_down))
+            } else {
+                btnDropDrawer.animate().rotation(0F).setDuration(500).start()
+                drawerEngineSearch.startAnimation(AnimationUtils.loadAnimation(this,R.anim.slide_up))
+                drawerEngineSearch.visibility = View.GONE
+            }
+            radioGoogle.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked){
+                    mainUrl = UrlHelper.googleSearchUrl
+                    saveSetting.savePossession(0)
+                    mainDrawer.closeDrawer(mainNav)
+                }
+            }
+            radioBing.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked){
+                    mainUrl = UrlHelper.bingSearchUrl
+                    saveSetting.savePossession(1)
+                    mainDrawer.closeDrawer(mainNav)
+                }
+            }
+            radioYahoo.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked){
+                    mainUrl = UrlHelper.yahooSearchUrl
+                    saveSetting.savePossession(2)
+                    mainDrawer.closeDrawer(mainNav)
+                }
+            }
+            isDropEngineSearch = !isDropEngineSearch
+        }
+    }
     private fun printPdf() {
         val title: String = HelperUnit().fileName(scrollWeb.url!!)
         val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
@@ -202,37 +253,6 @@ class MainActivity : AppCompatActivity(),EssentialMethod {
             registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         }
     }
-    private fun initSpinner() {
-        val icons = arrayOf(R.drawable.ic_google,R.drawable.ic_bing,R.drawable.ic_yahoo)
-        val spinnerIconAdapter = SpinnerIconAdapter(this,icons)
-        searchEngineSpinner.adapter = spinnerIconAdapter
-        searchEngineSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                when (position) {
-                    0 -> {
-                        mainUrl = UrlHelper.googleSearchUrl
-                        saveSetting.savePossession(position)
-                    }
-                    1 -> {
-                        mainUrl = UrlHelper.bingSearchUrl
-                        saveSetting.savePossession(position)
-                    }
-                    2 -> {
-                        mainUrl = UrlHelper.yahooSearchUrl
-                        saveSetting.savePossession(position)
-                    }
-                }
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-        searchEngineSpinner.setSelection(saveSetting.loadPossession())
-        when(saveSetting.loadPossession()){
-            0 -> MyToast(this,"موتور جست و جو گوگل",2).show()
-            1 -> MyToast(this,"موتور جست و جو بینگ",2).show()
-            2 -> MyToast(this,"موتور جست و جو یاهو",2).show()
-        }
-    }
-
     private fun bottomNavigationManagement() {
         bottomNavigationItems.setOnNavigationItemSelectedListener { item: MenuItem ->
             when (item.itemId) {

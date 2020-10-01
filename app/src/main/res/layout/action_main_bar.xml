@@ -17,10 +17,6 @@
             android:layout_height="35dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
-            <Spinner
-                android:id="@+id/searchEngineSpinner"
-                android:layout_width="35dp"
-                android:layout_height="35dp"/>
             <ImageView
                 android:id="@+id/btnSecurityPageInfo"
                 android:layout_width="25dp"
