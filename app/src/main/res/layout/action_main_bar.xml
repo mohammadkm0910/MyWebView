@@ -97,7 +97,6 @@
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
                 android:hint="@string/hint_input_text_find_in_page"
-                android:imeOptions="actionDone"
                 android:importantForAutofill="no"
                 android:inputType="text"
                 android:maxLines="1"

@@ -15,11 +15,13 @@
     <string name="new_tab">زبانه جدید</string>
     <string name="home_page">صفحه اصلی</string>
     <string name="open_menu">منو</string>
-    <!--popup_menu_top-->
+    <!--new text-->
+    <string name="toggle_desktop_mode">حالت دسکتاپ</string>
+    <string name="toggle_night_mode">حالت تاریک</string>
     <string name="clear_all_history">حذف تمام تاریخچه مرور</string>
     <string name="find_in_page">جست و جو در صفحه</string>
     <string name="list_downloads">لیست دانلود ها</string>
     <string name="print_page_pdf">پرینت صفحه</string>
     <string name="share_link">اشتراک صفحه</string>
-    <string name="exit">بستن</string>
+    <string name="exit">بستن برنامه</string>
 </resources>

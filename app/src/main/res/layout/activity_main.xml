@@ -43,7 +43,16 @@
                 android:focusable="true"
                 android:focusableInTouchMode="true"/>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-        <include layout="@layout/toggle_layout"/>
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigationItems"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@color/colorPrimary"
+            app:itemIconTint="@color/bottom_nav_color_selected"
+            app:itemTextColor="@color/bottom_nav_color_selected"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/bottom_navigation_menu" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
     <com.google.android.material.navigation.NavigationView
         android:layout_width="wrap_content"

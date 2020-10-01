@@ -12,4 +12,8 @@
         <item name="android:textStyle">bold</item>
         <item name="android:popupAnimationStyle">@android:anim/fade_in</item>
     </style>
+    <style name="AnimationPopupWindow">
+        <item name="android:windowEnterAnimation">@anim/zoom_in</item>
+        <item name="android:windowExitAnimation">@anim/zoom_out</item>
+    </style>
 </resources>

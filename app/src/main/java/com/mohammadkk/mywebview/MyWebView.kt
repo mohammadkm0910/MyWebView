@@ -23,7 +23,7 @@ class MyWebView : WebView,NestedScrollingChild {
     constructor(context: Context?) : this(context,null){
         initWebView()
     }
-    constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs,R.attr.name){
+    constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs,0){
         initWebView()
     }
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context!!, attrs, defStyleAttr){
@@ -44,7 +44,7 @@ class MyWebView : WebView,NestedScrollingChild {
         this.settings.databaseEnabled = true
         this.settings.domStorageEnabled = true
         this.settings.setAppCacheEnabled(true)
-        this.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+        this.settings.cacheMode = WebSettings.LOAD_DEFAULT
         this.settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
         this.scrollBarStyle = SCROLLBARS_OUTSIDE_OVERLAY
         this.isScrollbarFadingEnabled = true

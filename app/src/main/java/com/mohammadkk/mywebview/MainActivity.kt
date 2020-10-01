@@ -1,7 +1,6 @@
 package com.mohammadkk.mywebview
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.*
 import android.content.pm.ActivityInfo
@@ -14,6 +13,8 @@ import android.os.Bundle
 import android.os.Environment
 import android.print.PrintAttributes
 import android.print.PrintManager
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -21,9 +22,8 @@ import android.webkit.*
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.view.ContextThemeWrapper
-import androidx.appcompat.widget.PopupMenu
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -34,7 +34,6 @@ import com.monstertechno.adblocker.AdBlockerWebView
 import com.monstertechno.adblocker.util.AdBlocker
 import kotlinx.android.synthetic.main.action_main_bar.*
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.toggle_layout.*
 
 @Suppress("DEPRECATION", "UNUSED_ANONYMOUS_PARAMETER")
 class MainActivity : AppCompatActivity(),EssentialMethod {
@@ -48,7 +47,6 @@ class MainActivity : AppCompatActivity(),EssentialMethod {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         cci = CheckConnectionInternet(this)
-        behavior = BottomSheetBehavior.from(toggleLayout)
         saveSetting = SaveSetting(this)
         if (saveSetting.desktopModeLoad()) {
             scrollWeb.desktopMode(true)
@@ -65,82 +63,115 @@ class MainActivity : AppCompatActivity(),EssentialMethod {
         pageInfo()
         setSupportActionBar(actionMainBar)
         onActionbarTop()
-        toggleButtonManagement()
         bottomNavigationManagement()
         initSpinner()
         downloadManager()
         registerForContextMenu(scrollWeb)
         confirmPermissions()
-
     }
     fun createPopupMenu(view: View) {
-        val wrapper = ContextThemeWrapper(this@MainActivity, R.style.customPopupMenuStyleOne)
-        val popup = PopupMenu(wrapper, popupMenuBtn)
-        popup.menuInflater.inflate(R.menu.popup_menu_top, popup.menu)
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.allClearHistoryWeb -> {
-                    val builder = AlertDialog.Builder(this@MainActivity)
-                    builder.setTitle("حدف تمام تاریخچه مرور")
-                    builder.setMessage("آیا از حذف تمام تاریخچه مرور خود مطمئن هستید ؟")
-                    builder.setCancelable(true)
-                    builder.setNegativeButton("نه") { dialog: DialogInterface, which: Int -> dialog.dismiss() }
-                    builder.setPositiveButton("بله") { dialog: DialogInterface?, which: Int ->
-                        scrollWeb.clearHistory()
-                        scrollWeb.clearCache(true)
-                    }
-                    builder.show()
-                }
-                R.id.findWordToPage -> {
-                    layoutFindUrlTop.visibility = View.GONE
-                    layoutFindPanel.visibility = View.VISIBLE
-                    btnCloseDialogFindWord.setOnClickListener { v: View? ->
-                        layoutFindUrlTop.visibility = View.VISIBLE
-                        layoutFindPanel.visibility = View.GONE
-                        scrollWeb.findAllAsync("")
-                        edtFindWord.text.clear()
-                    }
-                    edtFindWord.setOnEditorActionListener { v, actionId, event ->
-                        if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            scrollWeb.findAllAsync(v.text.toString())
-                            val imm = v.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                            imm.hideSoftInputFromWindow(v.windowToken, 0)
-                        }
-                        false
-                    }
-                    btnDownFindWord.setOnClickListener { v: View? ->
-                        findControllerWebView(true)
-                    }
-                    btnUpFindWord.setOnClickListener { v: View? ->
-                        findControllerWebView(false)
-                    }
-                }
-                R.id.shareUrlWebView -> {
-                    val url = scrollWeb.url
-                    val shareIntent = Intent(Intent.ACTION_SEND)
-                    shareIntent.type = "text/plain"
-                    shareIntent.putExtra(Intent.EXTRA_TEXT, url)
-                    startActivity(Intent.createChooser(shareIntent, "اشتراک لینک"))
-                }
-                R.id.listDownloads -> startActivity(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS))
-                R.id.pintPdfPage -> printPdf()
-                R.id.exitApp -> finish()
+        val v = LayoutInflater.from(this).inflate(R.layout.popup_layout,findViewById(R.id.scrollPopup),false)
+        val toggleDesktopMode = v.findViewById<SwitchMaterial>(R.id.toggleDesktopMode)
+        val toggleNightMode = v.findViewById<SwitchMaterial>(R.id.toggleNightMode)
+        val clearAllHistory = v.findViewById<TextView>(R.id.clearAllHistory)
+        val findInPage = v.findViewById<TextView>(R.id.findInPage)
+        val showListDownloads = v.findViewById<TextView>(R.id.showListDownloads)
+        val printInPage = v.findViewById<TextView>(R.id.printInPage)
+        val shareLinkCurrentUrl = v.findViewById<TextView>(R.id.shareLinkCurrentUrl)
+        val exitApplication = v.findViewById<TextView>(R.id.exitApplication)
+        val popup = PopupWindow(v,WindowManager.LayoutParams.WRAP_CONTENT,WindowManager.LayoutParams.WRAP_CONTENT,true)
+        clearAllHistory.setOnClickListener {
+            val builder = AlertDialog.Builder(this@MainActivity)
+            builder.setTitle("حدف تمام تاریخچه مرور")
+            builder.setMessage("آیا از حذف تمام تاریخچه مرور خود مطمئن هستید ؟")
+            builder.setCancelable(true)
+            builder.setNegativeButton("نه") { dialog: DialogInterface, which: Int -> dialog.dismiss() }
+            builder.setPositiveButton("بله") { dialog: DialogInterface?, which: Int ->
+                scrollWeb.clearHistory()
+                scrollWeb.clearFormData()
+                scrollWeb.clearCache(true)
+                CookieManager.getInstance().removeAllCookies(null)
+                WebStorage.getInstance().deleteAllData()
             }
-            true
+            popup.dismiss()
+            builder.show()
         }
-        popup.show()
-    }
-
-    private fun findControllerWebView(next: Boolean) {
-        try {
-            if (next) {
+        findInPage.setOnClickListener {
+            layoutFindUrlTop.visibility = View.GONE
+            layoutFindPanel.visibility = View.VISIBLE
+            btnCloseDialogFindWord.setOnClickListener { v: View? ->
+                layoutFindUrlTop.visibility = View.VISIBLE
+                layoutFindPanel.visibility = View.GONE
+                scrollWeb.clearMatches()
+                edtFindWord.text.clear()
+            }
+            edtFindWord.addTextChangedListener(object :TextWatcher{
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    scrollWeb.findAllAsync(s.toString())
+                }
+                override fun afterTextChanged(s: Editable?) {}
+            })
+            btnDownFindWord.setOnClickListener { v: View? ->
                 scrollWeb.findNext(true)
-            } else {
+            }
+            btnUpFindWord.setOnClickListener { v: View? ->
                 scrollWeb.findNext(false)
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+            edtFindWord.setOnEditorActionListener { v, actionId, event ->
+                val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(v.windowToken,0)
+                false
+            }
+            popup.dismiss()
         }
+        showListDownloads.setOnClickListener {
+            startActivity(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS))
+        }
+        printInPage.setOnClickListener {
+            popup.dismiss()
+            printPdf()
+        }
+        exitApplication.setOnClickListener {
+            popup.dismiss()
+            finish()
+        }
+        shareLinkCurrentUrl.setOnClickListener {
+            val url = scrollWeb.url
+            val shareIntent = Intent(Intent.ACTION_SEND)
+            shareIntent.type = "text/plain"
+            shareIntent.putExtra(Intent.EXTRA_TEXT, url)
+            startActivity(Intent.createChooser(shareIntent, "اشتراک لینک"))
+            popup.dismiss()
+        }
+        if (saveSetting.desktopModeLoad())
+            toggleDesktopMode.isChecked = true
+        if (saveSetting.inversionColorLoad())
+            toggleNightMode.isChecked = true
+        toggleDesktopMode.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked) {
+                scrollWeb.desktopMode(true)
+            } else {
+                scrollWeb.desktopMode(false)
+            }
+            saveSetting.desktopModeSave(isChecked)
+            popup.dismiss()
+        }
+        toggleNightMode.setOnCheckedChangeListener { buttonView, isChecked ->
+            iInterfaceInversed = if (isChecked){
+                UrlHelper.jsInversesColor
+            } else {
+                ""
+            }
+            scrollWeb.reload()
+            saveSetting.inversionColorSave(isChecked)
+            popup.dismiss()
+        }
+        popup.elevation = 40F
+        popup.animationStyle = R.style.AnimationPopupWindow
+        popup.setBackgroundDrawable(ContextCompat.getDrawable(this,R.drawable.background_round_layout))
+        popup.showAtLocation(popupMenuBtn,Gravity.TOP or Gravity.START,10,100)
+
     }
     private fun printPdf() {
         val title: String = HelperUnit().fileName(scrollWeb.url!!)
@@ -201,34 +232,7 @@ class MainActivity : AppCompatActivity(),EssentialMethod {
             2 -> MyToast(this,"موتور جست و جو یاهو",2).show()
         }
     }
-    @SuppressLint("InflateParams")
-    private fun toggleButtonManagement() {
-        if (saveSetting.desktopModeLoad()) {
-            btnSwitchDesktopMode.isChecked = true
-        }
-        if (saveSetting.inversionColorLoad()) {
-            btnSwitchInversionColor.isChecked = true
-        }
-        btnSwitchDesktopMode.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            if (isChecked) {
-                scrollWeb.desktopMode(true)
-            } else {
-                scrollWeb.desktopMode(false)
-            }
-            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            saveSetting.desktopModeSave(isChecked)
-        }
-        btnSwitchInversionColor.setOnCheckedChangeListener { buttonView, isChecked ->
-            iInterfaceInversed = if (isChecked){
-                UrlHelper.jsInversesColor
-            } else {
-                ""
-            }
-            scrollWeb.reload()
-            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            saveSetting.inversionColorSave(isChecked)
-        }
-    }
+
     private fun bottomNavigationManagement() {
         bottomNavigationItems.setOnNavigationItemSelectedListener { item: MenuItem ->
             when (item.itemId) {
@@ -244,13 +248,6 @@ class MainActivity : AppCompatActivity(),EssentialMethod {
                 }
                 R.id.goNextWebView -> if (scrollWeb.canGoForward()) {
                     scrollWeb.goForward()
-                }
-                R.id.openDrawer -> {
-                    if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED){
-                        behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                    } else {
-                        behavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                    }
                 }
             }
             true
