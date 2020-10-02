@@ -27,4 +27,6 @@
     <string name="google">گوگل</string>
     <string name="bing">بینگ</string>
     <string name="yahoo">یاهو</string>
+    <string name="main_page">صفحه اصلي</string>
+    <string name="remove_tab">حذف زبانه</string>
 </resources>

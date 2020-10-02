@@ -9,10 +9,10 @@
         android:icon="@drawable/ic_back"
         android:title="@string/back"/>
     <item
-        android:id="@+id/addTabActivity"
+        android:id="@+id/addTab"
         android:icon="@drawable/ic_add"
         android:title="@string/new_tab"/>
-    <item android:id="@+id/goToHomePage"
-        android:icon="@drawable/ic_home"
-        android:title="@string/home_page"/>
+    <item android:id="@+id/removeTab"
+        android:icon="@drawable/ic_remove"
+        android:title="@string/remove_tab"/>
 </menu>

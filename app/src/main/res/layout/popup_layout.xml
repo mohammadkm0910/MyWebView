@@ -80,6 +80,16 @@
             android:textStyle="bold"
             android:background="?attr/selectableItemBackground"/>
         <TextView
+            android:id="@+id/mainPage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/main_page"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:background="?attr/selectableItemBackground"/>
+        <TextView
             android:id="@+id/exitApplication"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
