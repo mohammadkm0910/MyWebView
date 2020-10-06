@@ -7,10 +7,12 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.webkit.WebSettings
 import android.webkit.WebView
+import androidx.core.content.ContextCompat
 import androidx.core.view.MotionEventCompat
 import androidx.core.view.NestedScrollingChild
 import androidx.core.view.NestedScrollingChildHelper
 import androidx.core.view.ViewCompat
+import androidx.palette.graphics.Palette
 import kotlin.math.max
 
 @Suppress("DEPRECATION")
@@ -135,9 +137,8 @@ class MyWebView : WebView,NestedScrollingChild {
         this.reload()
     }
     fun getColor(bitmap: Bitmap):Int{
-        val newBitmap = Bitmap.createScaledBitmap(bitmap,1,1,true)
-        val color = newBitmap.getPixel(0,0)
-        newBitmap.recycle()
-        return color
+        val palette = Palette.from(bitmap).generate()
+        val default = ContextCompat.getColor(context,R.color.blueTwo)
+        return palette.getVibrantColor(default)
     }
 }
