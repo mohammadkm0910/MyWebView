@@ -139,6 +139,7 @@ class MyWebView : WebView,NestedScrollingChild {
     fun getColor(bitmap: Bitmap):Int{
         val palette = Palette.from(bitmap).generate()
         val default = ContextCompat.getColor(context,R.color.blueTwo)
-        return palette.getVibrantColor(default)
+        val muted= palette.getDominantColor(default)
+        return palette.getVibrantColor(muted)
     }
 }

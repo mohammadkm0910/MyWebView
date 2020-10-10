@@ -8,10 +8,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.view.get
 import androidx.recyclerview.widget.RecyclerView
 import com.mohammadkk.mywebview.R
-import com.mohammadkk.mywebview.utils.Services
-import com.mohammadkk.mywebview.utils.Services.isTargetList
 
 class TabRecyclerAdapter(private var context: Context, private var itemTabs: ArrayList<Tab>,private var onItemTabClick:OnItemTabClick) : RecyclerView.Adapter<TabRecyclerAdapter.ViewHolder>() {
     interface OnItemTabClick{
@@ -20,13 +19,12 @@ class TabRecyclerAdapter(private var context: Context, private var itemTabs: Arr
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val iconWeb:ImageView = itemView.findViewById(R.id.iconWeb)
         val titleWeb: TextView = itemView.findViewById(R.id.titleWeb)
-        private val tabCount: CardView = itemView.findViewById(R.id.tabCount)
-        fun click(index: Int,onItemTabClick: OnItemTabClick) {
+        val tabCount: CardView = itemView.findViewById(R.id.tabCount)
+        fun click(index: Int,onItemTabClick: OnItemTabClick,) {
             tabCount.setOnClickListener {
                 onItemTabClick.onTabClick(index)
-                isTargetList = false
+                indexGet = index
             }
-            if (!isTargetList) tabCount.setCardBackgroundColor(Color.GRAY) else tabCount.setCardBackgroundColor(Color.WHITE)
         }
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -35,10 +33,13 @@ class TabRecyclerAdapter(private var context: Context, private var itemTabs: Arr
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.iconWeb.setImageBitmap(itemTabs[position].webView.favicon)
         holder.titleWeb.text = itemTabs[position].webView.title
-        isTargetList = true
         holder.click(position,onItemTabClick)
+        if (indexGet == position) holder.tabCount.setCardBackgroundColor(Color.GRAY) else holder.tabCount.setCardBackgroundColor(Color.WHITE)
     }
     override fun getItemCount(): Int {
         return itemTabs.size
+    }
+    companion object{
+        var indexGet = 0
     }
 }

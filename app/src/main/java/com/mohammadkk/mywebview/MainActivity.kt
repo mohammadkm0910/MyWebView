@@ -21,6 +21,7 @@ import android.view.inputmethod.InputMethodManager
 import android.webkit.*
 import android.widget.PopupWindow
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -32,14 +33,12 @@ import com.mohammadkk.mywebview.tab.Tab
 import com.mohammadkk.mywebview.tab.TabRecyclerAdapter
 import com.mohammadkk.mywebview.utils.MyToast
 import com.mohammadkk.mywebview.utils.Services
-import com.mohammadkk.mywebview.utils.Services.isTargetList
 import com.monstertechno.adblocker.AdBlockerWebView
 import com.monstertechno.adblocker.util.AdBlocker
 import kotlinx.android.synthetic.main.action_main_bar.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.header_layout_drawer.*
-import java.util.*
-import kotlin.collections.ArrayList
+import java.io.File
 import kotlin.properties.Delegates
 
 @Suppress("DEPRECATION", "UNUSED_ANONYMOUS_PARAMETER")
@@ -200,20 +199,21 @@ class MainActivity : AppCompatActivity() {
         } else {
             getCurrentWebView().desktopMode(false)
         }
-        tabRecyclerAdapter = TabRecyclerAdapter(this,tabs,object : TabRecyclerAdapter.OnItemTabClick{
+        tabRecyclerAdapter = TabRecyclerAdapter(this, tabs, object : TabRecyclerAdapter.OnItemTabClick {
             override fun onTabClick(index: Int) {
                 switchToTab(index)
+                tabRecyclerAdapter.notifyDataSetChanged()
             }
 
         })
         tabContainerRecycler.adapter = tabRecyclerAdapter
-        tabContainerRecycler.layoutManager = LinearLayoutManager(this,RecyclerView.VERTICAL,false)
+        tabContainerRecycler.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         pageInfo()
         setupDrawer()
         setSupportActionBar(actionMainBar)
         onActionbarTop()
         bottomNavigationManagement()
-        registerForContextMenu(getCurrentWebView())
+        registerForContextMenu(webViews)
         confirmPermissions()
     }
     fun createPopupMenu(view: View) {
@@ -291,11 +291,6 @@ class MainActivity : AppCompatActivity() {
             popup.dismiss()
         }
         shareLinkCurrentUrl.setOnClickListener {
-            val url = getCurrentWebView().url
-            val shareIntent = Intent(Intent.ACTION_SEND)
-            shareIntent.type = "text/plain"
-            shareIntent.putExtra(Intent.EXTRA_TEXT, url)
-            startActivity(Intent.createChooser(shareIntent, "اشتراک لینک"))
             popup.dismiss()
         }
         if (saveSetting.desktopModeLoad())
@@ -392,7 +387,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.addTab -> {
                     newTab(UrlHelper.googleUrl)
-                    switchToTab(tabs.size -1)
+                    switchToTab(tabs.size - 1)
                     tabRecyclerAdapter.notifyDataSetChanged()
                 }
                 R.id.goBackWebView -> if (getCurrentWebView().canGoBack()) {
@@ -470,6 +465,23 @@ class MainActivity : AppCompatActivity() {
                         }
                         false
                     }
+            menu.add(0,2,0,"کپی آدرس عکس").setOnMenuItemClickListener {
+                if (webViewHitResult.extra.toString().isNotEmpty()){
+                    val clipboard = this.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clipData = ClipData.newPlainText("IMAGE_URL",webViewHitResult.extra)
+                    clipboard.setPrimaryClip(clipData)
+                    Toast.makeText(this,"آدرس عکس کپی شد",Toast.LENGTH_LONG).show()
+                }
+                false
+            }
+            menu.add(0,3,0,"باز کردن در پنجره جدید").setOnMenuItemClickListener {
+                if (webViewHitResult.extra.toString().isNotEmpty()){
+                    newTab(webViewHitResult.extra.toString())
+                    switchToTab(tabs.size-1)
+                    tabRecyclerAdapter.notifyDataSetChanged()
+                }
+                false
+            }
         }
     }
     override fun onBackPressed() {
@@ -514,9 +526,9 @@ class MainActivity : AppCompatActivity() {
         }
         getCurrentWebView().visibility = View.VISIBLE
         getCurrentWebView().requestFocus()
-        tabRecyclerAdapter.notifyDataSetChanged()
         edtUrl.setText(getCurrentWebView().url)
         actionMainBar.setBackgroundColor(getCurrentTab().bgColor)
+        tabRecyclerAdapter.notifyDataSetChanged()
     }
     private fun certificateToStr(certificate: SslCertificate?): String? {
         if (certificate == null) {
@@ -540,5 +552,8 @@ class MainActivity : AppCompatActivity() {
             s += String.format("Expires on: %tF %tT %tz\n", expiryDate, expiryDate, expiryDate)
         }
         return s
+    }
+    companion object{
+        private const val OPEN_PDF = 100
     }
 }
