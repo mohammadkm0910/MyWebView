@@ -13,10 +13,11 @@ import androidx.core.view.NestedScrollingChild
 import androidx.core.view.NestedScrollingChildHelper
 import androidx.core.view.ViewCompat
 import androidx.palette.graphics.Palette
+import im.delight.android.webview.AdvancedWebView
 import kotlin.math.max
 
 @Suppress("DEPRECATION")
-class MyWebView : WebView,NestedScrollingChild {
+class MyWebView : AdvancedWebView,NestedScrollingChild {
     private var mLastMotionY = 0
     private val mScrollOffset = IntArray(2)
     private val mScrollConsumed = IntArray(2)
@@ -37,9 +38,6 @@ class MyWebView : WebView,NestedScrollingChild {
         isNestedScrollingEnabled = true
         this.settings.javaScriptEnabled = true
         this.settings.javaScriptCanOpenWindowsAutomatically = true
-        this.settings.setSupportZoom(true)
-        this.settings.builtInZoomControls = true
-        this.settings.displayZoomControls = false
         this.settings.allowContentAccess = true
         this.settings.allowFileAccess = true
         this.settings.allowUniversalAccessFromFileURLs = true
@@ -51,6 +49,8 @@ class MyWebView : WebView,NestedScrollingChild {
         this.scrollBarStyle = SCROLLBARS_OUTSIDE_OVERLAY
         this.isScrollbarFadingEnabled = true
         this.isFocusable = true
+        this.clearSslPreferences()
+        this.setZoom(true)
     }
     @Suppress("DEPRECATION")
     @SuppressLint("ClickableViewAccessibility")
@@ -123,23 +123,15 @@ class MyWebView : WebView,NestedScrollingChild {
     override fun dispatchNestedPreFling(velocityX: Float, velocityY: Float): Boolean {
         return mChildHelper!!.dispatchNestedPreFling(velocityX, velocityY)
     }
-    fun desktopMode(enabled:Boolean){
-        val webSettings = this.settings
-        val newUserAgent:String
-        newUserAgent = if (enabled) {
-            webSettings.userAgentString.replace("Mobile", "eliboM").replace("Android", "diordnA")
-        } else {
-            webSettings.userAgentString.replace("eliboM", "Mobile").replace("diordnA", "Android")
-        }
-        webSettings.userAgentString = newUserAgent
-        webSettings.useWideViewPort = enabled
-        webSettings.loadWithOverviewMode = enabled
-        this.reload()
-    }
     fun getColor(bitmap: Bitmap):Int{
         val palette = Palette.from(bitmap).generate()
         val default = ContextCompat.getColor(context,R.color.blueTwo)
         val muted= palette.getDominantColor(default)
         return palette.getVibrantColor(muted)
+    }
+    fun setZoom(enabled: Boolean){
+        this.settings.setSupportZoom(enabled)
+        this.settings.builtInZoomControls = enabled
+        this.settings.displayZoomControls = !enabled
     }
 }

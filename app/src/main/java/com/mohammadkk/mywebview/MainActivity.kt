@@ -195,9 +195,11 @@ class MainActivity : AppCompatActivity() {
         getCurrentWebView().visibility = View.VISIBLE
         getCurrentWebView().requestFocus()
         if (saveSetting.desktopModeLoad()) {
-            getCurrentWebView().desktopMode(true)
+            getCurrentWebView().setDesktopMode(true)
+            getCurrentWebView().setZoom(true)
         } else {
-            getCurrentWebView().desktopMode(false)
+            getCurrentWebView().setDesktopMode(false)
+            getCurrentWebView().setZoom(true)
         }
         tabRecyclerAdapter = TabRecyclerAdapter(this, tabs, object : TabRecyclerAdapter.OnItemTabClick {
             override fun onTabClick(index: Int) {
@@ -298,11 +300,8 @@ class MainActivity : AppCompatActivity() {
         if (saveSetting.inversionColorLoad())
             toggleNightMode.isChecked = true
         toggleDesktopMode.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isChecked) {
-                getCurrentWebView().desktopMode(true)
-            } else {
-                getCurrentWebView().desktopMode(false)
-            }
+            getCurrentWebView().setDesktopMode(isChecked)
+            getCurrentWebView().setZoom(true)
             saveSetting.desktopModeSave(isChecked)
             getCurrentWebView().requestFocus()
             popup.dismiss()
