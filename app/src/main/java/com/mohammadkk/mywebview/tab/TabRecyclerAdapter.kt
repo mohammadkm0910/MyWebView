@@ -23,7 +23,6 @@ class TabRecyclerAdapter(private var context: Context, private var itemTabs: Arr
         fun click(index: Int,onItemTabClick: OnItemTabClick,) {
             tabCount.setOnClickListener {
                 onItemTabClick.onTabClick(index)
-                indexGet = index
             }
         }
     }
@@ -34,12 +33,11 @@ class TabRecyclerAdapter(private var context: Context, private var itemTabs: Arr
         holder.iconWeb.setImageBitmap(itemTabs[position].webView.favicon)
         holder.titleWeb.text = itemTabs[position].webView.title
         holder.click(position,onItemTabClick)
-        if (indexGet == position) holder.tabCount.setCardBackgroundColor(Color.GRAY) else holder.tabCount.setCardBackgroundColor(Color.WHITE)
+        itemTabs[position]
+        if (getIndex == position) holder.tabCount.setCardBackgroundColor(Color.GRAY) else holder.tabCount.setCardBackgroundColor(Color.WHITE)
     }
     override fun getItemCount(): Int {
         return itemTabs.size
     }
-    companion object{
-        var indexGet = 0
-    }
+    var getIndex = 0
 }

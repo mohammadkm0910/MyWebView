@@ -196,14 +196,13 @@ class MainActivity : AppCompatActivity() {
         getCurrentWebView().requestFocus()
         if (saveSetting.desktopModeLoad()) {
             getCurrentWebView().setDesktopMode(true)
-            getCurrentWebView().setZoom(true)
         } else {
             getCurrentWebView().setDesktopMode(false)
-            getCurrentWebView().setZoom(true)
         }
         tabRecyclerAdapter = TabRecyclerAdapter(this, tabs, object : TabRecyclerAdapter.OnItemTabClick {
             override fun onTabClick(index: Int) {
                 switchToTab(index)
+                tabRecyclerAdapter.getIndex = index
                 tabRecyclerAdapter.notifyDataSetChanged()
             }
 
@@ -301,7 +300,6 @@ class MainActivity : AppCompatActivity() {
             toggleNightMode.isChecked = true
         toggleDesktopMode.setOnCheckedChangeListener { buttonView, isChecked ->
             getCurrentWebView().setDesktopMode(isChecked)
-            getCurrentWebView().setZoom(true)
             saveSetting.desktopModeSave(isChecked)
             getCurrentWebView().requestFocus()
             popup.dismiss()
@@ -387,6 +385,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.addTab -> {
                     newTab(UrlHelper.googleUrl)
                     switchToTab(tabs.size - 1)
+                    tabRecyclerAdapter.getIndex = tabs.size - 1
                     tabRecyclerAdapter.notifyDataSetChanged()
                 }
                 R.id.goBackWebView -> if (getCurrentWebView().canGoBack()) {
@@ -516,7 +515,7 @@ class MainActivity : AppCompatActivity() {
     }
     private fun closeCurrentTab(){
         webViews.removeView(getCurrentWebView())
-        getCurrentWebView().display
+        getCurrentWebView().destroy()
         tabs.removeAt(currentTabIndex)
         if (currentTabIndex >= tabs.size) currentTabIndex = tabs.size -1
         if (currentTabIndex == -1) {
@@ -527,6 +526,7 @@ class MainActivity : AppCompatActivity() {
         getCurrentWebView().requestFocus()
         edtUrl.setText(getCurrentWebView().url)
         actionMainBar.setBackgroundColor(getCurrentTab().bgColor)
+        tabRecyclerAdapter.getIndex = currentTabIndex
         tabRecyclerAdapter.notifyDataSetChanged()
     }
     private fun certificateToStr(certificate: SslCertificate?): String? {
@@ -551,8 +551,5 @@ class MainActivity : AppCompatActivity() {
             s += String.format("Expires on: %tF %tT %tz\n", expiryDate, expiryDate, expiryDate)
         }
         return s
-    }
-    companion object{
-        private const val OPEN_PDF = 100
     }
 }

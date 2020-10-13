@@ -1,10 +1,15 @@
 package com.mohammadkk.mywebview
 
 import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Environment
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.webkit.CookieManager
+import android.webkit.URLUtil
 import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.core.content.ContextCompat
@@ -13,20 +18,19 @@ import androidx.core.view.NestedScrollingChild
 import androidx.core.view.NestedScrollingChildHelper
 import androidx.core.view.ViewCompat
 import androidx.palette.graphics.Palette
-import im.delight.android.webview.AdvancedWebView
 import kotlin.math.max
 
 @Suppress("DEPRECATION")
-class MyWebView : AdvancedWebView,NestedScrollingChild {
+class MyWebView : WebView,NestedScrollingChild {
     private var mLastMotionY = 0
     private val mScrollOffset = IntArray(2)
     private val mScrollConsumed = IntArray(2)
     private var mNestedYOffset = 0
     private var mChildHelper: NestedScrollingChildHelper? = null
-    constructor(context: Context?) : this(context,null){
+    constructor(context: Context?) : this(context, null){
         initWebView()
     }
-    constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs,0){
+    constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0){
         initWebView()
     }
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context!!, attrs, defStyleAttr){
@@ -42,6 +46,9 @@ class MyWebView : AdvancedWebView,NestedScrollingChild {
         this.settings.allowFileAccess = true
         this.settings.allowUniversalAccessFromFileURLs = true
         this.settings.databaseEnabled = true
+        this.settings.setSupportZoom(true)
+        this.settings.builtInZoomControls = true
+        this.settings.displayZoomControls = false
         this.settings.domStorageEnabled = true
         this.settings.setAppCacheEnabled(true)
         this.settings.cacheMode = WebSettings.LOAD_DEFAULT
@@ -50,7 +57,6 @@ class MyWebView : AdvancedWebView,NestedScrollingChild {
         this.isScrollbarFadingEnabled = true
         this.isFocusable = true
         this.clearSslPreferences()
-        this.setZoom(true)
     }
     @Suppress("DEPRECATION")
     @SuppressLint("ClickableViewAccessibility")
@@ -125,13 +131,26 @@ class MyWebView : AdvancedWebView,NestedScrollingChild {
     }
     fun getColor(bitmap: Bitmap):Int{
         val palette = Palette.from(bitmap).generate()
-        val default = ContextCompat.getColor(context,R.color.blueTwo)
+        val default = ContextCompat.getColor(context, R.color.blueTwo)
         val muted= palette.getDominantColor(default)
         return palette.getVibrantColor(muted)
     }
-    fun setZoom(enabled: Boolean){
-        this.settings.setSupportZoom(enabled)
-        this.settings.builtInZoomControls = enabled
-        this.settings.displayZoomControls = !enabled
+    fun setDesktopMode(enabled: Boolean) {
+        var newUserAgent = this.settings.userAgentString
+        if (enabled) {
+            try {
+                val ua = this.settings.userAgentString
+                val androidOSString = this.settings.userAgentString.substring(ua.indexOf("("), ua.indexOf(")") + 1)
+                newUserAgent = this.settings.userAgentString.replace(androidOSString, "(X11; Linux x86_64)")
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        } else {
+            newUserAgent = null
+        }
+        this.settings.userAgentString = newUserAgent
+        this.settings.useWideViewPort = enabled
+        this.settings.loadWithOverviewMode = enabled
+        this.reload()
     }
 }
